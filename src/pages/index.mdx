@@ -1,0 +1,34 @@
+---
+---
+
+import { withPrefix } from "gatsby";
+
+export default ({ children }) => (
+  <div>
+    <h1>Asset Prefix Kerfuffle Demo</h1>
+    <div>{children}</div>
+  </div>
+);
+
+<p>
+  <code>assetPrefix: </code> {props.data.site.assetPrefix}
+</p>
+
+### The "bug"
+
+[This link](/link/) should be `<a href="/link/">...</a>` based on the markdown it is given, but it actually `<a href="https://example.com/_assets/link/">...</a>`. While one would expect the `href` value to simply pass through, the MDX plugin is prepending the full path. The initial instinct is to dismiss this as an MDX issue, but it's just a symptom. The "bug", so to speak, happens because the MDX plugin prefixes absolute urls with the `pathPrefix` value, which — presumably erroneously — includes the value of `assetPrefix`.
+
+### The cause
+
+In this site, `assetPrefix` is set to `https://example.com/_assets/`. There is no value for `pathPrefix` set. One would expect `pathPrefix` to be an empty string.
+
+In the console of your shell, you will see the `pathPrefix` value is printed. The `pathPrefix` includes the value of `assetPrefix`. Based on the nomenclature, this seems backwards, as one would assume `pathPrefix` would refer to all paths while `assetPrefix` only applies to asset paths. Thus, one might expect that a value of `pathPrefix` might appear within `assetPrefix` but not the other way around.
+
+export const pageQuery = graphql`
+  query {
+    site {
+      assetPrefix
+      pathPrefix
+    }
+  }
+`;
